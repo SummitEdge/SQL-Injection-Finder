@@ -1,19 +1,16 @@
-#/usr/bin/python3
-from googlesearch import search
-from socket import timeout
-import sys
-from termcolor import colored
-import urllib
-import urllib.request
-import terminal_banner
+#!/usr/bin/env python3
 import random
 import os
+import sys
+import urllib.request
+from socket import timeout
+from termcolor import colored
+from googlesearch import search
+import terminal_banner
 
+os.system('clear')
 
-os. system('clear')
-
-banner = ("""
-                    
+banner_text = """
               ╔═╗╔═╗ ╦  ╦   ╔═╗╦╔╗╔╔╦╗╔═╗╦═╗
               ╚═╗║═╬╗║  ║───╠╣ ║║║║ ║║║╣ ╠╦╝
               ╚═╝╚═╝╚╩═╝╩   ╚  ╩╝╚╝═╩╝╚═╝╩╚═                          
@@ -23,51 +20,50 @@ banner = ("""
             ###################################
 
                   Developed by Jitesh Kumar
-            Intagram  - https://instagram.com/jitesh.haxx
-            linkedin  - https://linkedin.com/j1t3sh 
-                Github - https://github.com/j1t3sh
+            Instagram  - https://instagram.com/jitesh.haxx
+            LinkedIn  - https://linkedin.com/j1t3sh 
+                GitHub - https://github.com/j1t3sh
                                     
-       ( DONT COPY THE CODE. CONTRIBUTIONS ARE MOST WELCOME ❤️ )
-                                                                                
-""")
-banner_terminal = terminal_banner.Banner(banner)
-print (colored(banner_terminal, 'green')+ "\n")
+       (DON'T COPY THE CODE. CONTRIBUTIONS ARE MOST WELCOME ❤️)
+"""
+banner_terminal = terminal_banner.Banner(banner_text)
+print(colored(banner_terminal, 'green') + "\n")
 
-website_list=[] #list of websites
-dork = "inurl:" + input(colored("Please input the sqli Dork(eg- php?id=, aspx?id=) ---->  ",'cyan'))
-extension = "site:" + input(colored("Please specify the website extension(eg- .in,.com,.pk) [default: none] -----> ",'cyan')) #Add none as extension
-total_output = int(input(colored("Pleases specify the total no. of websites you want) ----> ",'cyan')))
-page_no = int(input(colored("From which Google page you want to start(eg- 1,2,3) ----> ",'cyan')))
+website_list = []
+
+dork = "inurl:" + input(colored("Please input the SQLi Dork (e.g., php?id=, aspx?id=) ----> ", 'cyan'))
+extension = "site:" + input(colored("Please specify the website extension (e.g., .in, .com, .pk) [default: none] -----> ", 'cyan'))
+total_output = int(input(colored("Please specify the total number of websites you want ----> ", 'cyan')))
+page_no = int(input(colored("From which Google page do you want to start (e.g., 1, 2, 3) ----> ", 'cyan')))
 
 if extension == "site:":
-    extenstion = ""
+    extension = ""
 
 try:
-    query = dork + " " +  extension 
-    pause_random = int(random.randrange(4, 10, 2))
-    for j in search(query, num=10,start=page_no*5,stop=total_output, pause=pause_random,
-    user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'): #add User-Agent
-        website_list.append(j) 
+    query = dork + " " + extension
+    pause_random = random.randint(4, 10)
+    for result in search(query, num=10, start=page_no * 5, stop=total_output, pause=pause_random, 
+                        user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'):
+        website_list.append(result)
 
-    for i in website_list:
+    for website in website_list:
+        try:
+            full_url = website
             try:
-                fullurl = i
-                try:
-                    resp = urllib.request.urlopen(fullurl + "'", timeout=15) #set timeout 
-                except timeout:
-                    print (i + " ===> " + colored("Time out !",'orange'))
-                    pass #pass if website not responding after 15 seconds
-                body = resp.read()
-                fullbody = body.decode('utf-8')
-                if "SQL syntax" in fullbody:  
-                    print(i + " ===> " +  colored(" Vulnerable!",'green')) #if vulnerable
-                else:
-                    print (i + " ===> " + colored(" Not Vulnerable!",'red')) #if not vulnerable
-                    
-            except:
-                print(i + "  ===> " + colored(" Can not be Determined",'blue'))
+                resp = urllib.request.urlopen(full_url + "'", timeout=15)
+            except timeout:
+                print(website + " ===> " + colored("Timeout!", 'yellow'))
                 continue
-except:
+            body = resp.read()
+            full_body = body.decode('utf-8')
+            if "SQL syntax" in full_body:
+                print(website + " ===> " + colored("Vulnerable!", 'green'))
+            else:
+                print(website + " ===> " + colored("Not Vulnerable!", 'red'))
+        except Exception as e:
+            print(website + " ===> " + colored("Cannot be determined", 'blue'))
+            continue
 
-    print("Your IP has been blocked by Google, Wait for 1 hr. ")
-    print("Go chill outside then comeback & start to hunt again :)")
+except Exception as e:
+    print("Your IP has been blocked by Google. Wait for 1 hour.")
+    print("Go chill outside, then come back and start hunting again :)")
